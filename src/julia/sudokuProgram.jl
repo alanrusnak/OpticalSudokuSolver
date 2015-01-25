@@ -3,7 +3,7 @@
 * 
 * This file is part of Picture.
 *
-* Description: Picture program for 3D human pose estimation
+* Description: 
 * 
 * Picture is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,13 @@ using Debug
         fname = readline(client)
         fname = strip(fname)
         close(client)
-        rendering = scpy.imread(str)
+        rendering = scpy.imread(fname)
         return rendering
 end
 
 global IMAGE_COUNTER = 0
 OBSERVATIONS=Dict()
-OBS_FNAME = "C:/Users/Alan/Documents/Project/20141224_143900.jpg"
+OBS_FNAME = "C:/Users/Alan/Documents/SudokuProject/samples/20141224_143900.jpg"
 OBS_IMAGE = int(scpy.imread(OBS_FNAME,true))/255.0
 OBS_IMAGE = edge.canny(OBS_IMAGE, sigma=1.0)
 #calculate and store distance transform 
@@ -84,15 +84,16 @@ end
 function debug_callback(TRACE)
 	global IMAGE_COUNTER
 	println("LOGL=>", TRACE["ll"])
-	scpy.imsave(string("C:/Users/Alan/Documents/Project/output/",string(IMAGE_COUNTER),".png",), TRACE["PROGRAM_OUTPUT"])
+	scpy.imsave(string("C:/Users/Alan/Documents/SudokuProject/output/",string(IMAGE_COUNTER),".png",), TRACE["PROGRAM_OUTPUT"])
 	IMAGE_COUNTER += 1
 end
 
+println("Start")
 load_program(PROGRAM)
 load_observations(OBSERVATIONS)
 init()
 infer(debug_callback,10,"CYCLE")
-
+println("Finish")
 # plt.show(block=true)
 
 
