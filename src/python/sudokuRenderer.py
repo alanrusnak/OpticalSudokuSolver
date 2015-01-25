@@ -108,9 +108,10 @@ def render(CMDS):
 
     sudokuGrid()
 
-    pygame.display.flip()
-    imagepath = "C:/Users/Alan/Documents/Project/" + CMDS + ".png"
+
+    imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + CMDS + ".png"
     pygame.image.save(screen, imagepath)
+    pygame.display.flip()
     x=Image.open(imagepath,'r')
     x=x.convert('L')
     x.save(imagepath)
