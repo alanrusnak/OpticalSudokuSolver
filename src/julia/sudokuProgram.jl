@@ -28,7 +28,7 @@ using Debug
 
 
 @debug function render(CMDS)
-	      client = connect(5005)
+	client = connect(5005)
         println(client,CMDS)
         fname = readline(client)
         fname = strip(fname)
@@ -39,7 +39,8 @@ end
 
 global IMAGE_COUNTER = 0
 OBSERVATIONS=Dict()
-OBS_FNAME = "C:/Users/Alan/Documents/SudokuProject/samples/20141224_143900.jpg"
+#OBS_FNAME = "C:/Users/Alan/Documents/SudokuProject/samples/20141224_143900.jpg"
+OBS_FNAME = "C:/Users/Alan/Documents/SudokuProject/samples/10.png"
 OBS_IMAGE = int(scpy.imread(OBS_FNAME,true))/255.0
 OBS_IMAGE = edge.canny(OBS_IMAGE, sigma=1.0)
 #calculate and store distance transform 
@@ -48,24 +49,21 @@ OBSERVATIONS["dist_obs"] = dist_obs
 
 
 function PROGRAM()	
-	LINE=Stack(Int);FUNC=Stack(Int);LOOP=Stack(Int)
+  LINE=Stack(Int);FUNC=Stack(Int);LOOP=Stack(Int)
+  CMDS = Dict()
+  cnt=1;
 	
-	
-
-	CMDS = Dict()
-	cnt=1;
-
-  ex = 2
-  ey = 4.4
-  ez = 18
-  cx = 4.5
-  cy = 4.5
+  ex = Uniform(0,9,1,1) 
+  ey = Uniform(2,4.5,1,1) 
+  ez = Uniform(16,20,1,1) 
+  cx = Uniform(3,6,1,1) 
+  cy = Uniform(3,6,1,1) 
   cz = 0
   CMDS = string(ex) * "_" * string(ey) * "_" * string(ez) * "_" * string(cx) * "_" * string(cy) * "_" * string(cz)  
 
-	rendering = render(CMDS)
+  rendering = render(CMDS)
 
-	edgemap = pyeval("canny(rendering,1.0)", canny = edge.canny, rendering=rendering) #edgemap = edge.canny(rendering, sigma=1.0)
+  edgemap = pyeval("canny(rendering,1.0)", canny = edge.canny, rendering=rendering) #edgemap = edge.canny(rendering, sigma=1.0)
 
 	#calculate distance transform
 	# dist_obs = scp_morph.distance_transform_edt(~OBSERVATIONS["IMAGE"])
@@ -92,7 +90,7 @@ println("Start")
 load_program(PROGRAM)
 load_observations(OBSERVATIONS)
 init()
-infer(debug_callback,10,"CYCLE")
+infer(debug_callback,20,"CYCLE")
 println("Finish")
 # plt.show(block=true)
 
