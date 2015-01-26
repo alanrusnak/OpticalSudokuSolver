@@ -1,4 +1,4 @@
-__author__ = 'Alan Rusnak, 2015'
+__author__ = 'Alan'
 
 import socket
 import time
@@ -8,7 +8,6 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 width, height = 720,1280
-
 
 def sudokuGrid():
     glLineWidth(2)
@@ -71,7 +70,7 @@ def sudokuGrid():
     glVertex3f(8, 9, 0)
     glEnd()
 
-def render(CMDS):
+def initialiseGL():
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA)
     glutInitWindowSize(width, height)
@@ -90,10 +89,11 @@ def render(CMDS):
     glMatrixMode( GL_MODELVIEW )
     glLoadIdentity( )
     glClearColor(1,1,1,1)
-    glClear(GL_COLOR_BUFFER_BIT)
-    glPushMatrix()
-    glLoadIdentity()
 
+def render(CMDS):
+
+    glClear(GL_COLOR_BUFFER_BIT)
+    glLoadIdentity()
     ex,ey,ez,cx,cy,cz = CMDS.split("_")
     ex = float(ex)
     ey = float(ey)
@@ -105,27 +105,24 @@ def render(CMDS):
     gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
 
     sudokuGrid()
-
-
     imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + CMDS + ".png"
-    glPopMatrix()
     glPixelStorei(GL_PACK_ALIGNMENT, 1)
     data = glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE)
     image = Image.fromstring("RGBA", (width, height), data)
-    image.save(imagepath, 'PNG')
-    #glutSwapBuffers()
-    x=Image.open(imagepath,'r')
-    x=x.convert('L')
-    x.save(imagepath)
+    glutSwapBuffers()
+    image=image.convert('L')
+    image.save(imagepath)
 
     return imagepath
 
+
 def runServer(TCP_IP,TCP_PORT):
-    BUFFER_SIZE = 1024  # Normally 1024, but we want fast response
+    BUFFER_SIZE = 1024
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((TCP_IP, TCP_PORT))
     s.listen(1)
+
     while 1:
         conn, addr = s.accept()
         print 'Connection address:', addr
@@ -135,11 +132,10 @@ def runServer(TCP_IP,TCP_PORT):
             CMDS = CMDS.rstrip('\n')
             if not CMDS: break
             print "received data:", CMDS
-            t = time.clock()
+
             imagepath = render(CMDS)
             conn.send(imagepath + "\n")  # echo
-            print("data sent, time: " + str((time.clock()-t)*1000))
         conn.close()
 
+initialiseGL()
 runServer('127.0.0.1',5005)
-#render("3_4.4_18_4.5_4.5_0")
