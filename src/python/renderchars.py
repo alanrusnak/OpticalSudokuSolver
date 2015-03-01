@@ -73,9 +73,21 @@ def sudokuGrid():
     glVertex3f(8, 9, 0)
     glEnd()
 
-def LoadTextures():
+def drawCharacter(num,x,y):
+    LoadTexture(str(num))
+    glEnable(GL_TEXTURE_2D)
+    glBegin(GL_QUADS)                # Start Drawing The Cube
+    # Front Face (note that the texture's corners have to match the quad's corners)
+    glTexCoord2f(0.0, 0.0); glVertex3f(x, y,  -0.01)    # Bottom Left Of The Texture and Quad
+    glTexCoord2f(1.0, 0.0); glVertex3f( x+1, y,  -0.01)    # Bottom Right Of The Texture and Quad
+    glTexCoord2f(1.0, 1.0); glVertex3f( x+1,  y+1, -0.01)    # Top Right Of The Texture and Quad
+    glTexCoord2f(0.0, 1.0); glVertex3f(x,  y+1,  -0.01)    # Top Left Of The Texture and Quad
+    glEnd();                # Done Drawing The Cube
+
+
+def LoadTexture(num):
     #global texture
-    image = open("one.bmp")
+    image = open(num + ".bmp")
     
     ix = image.size[0]
     iy = image.size[1]
@@ -96,8 +108,8 @@ def LoadTextures():
 
 # A general OpenGL initialization function.  Sets all of the initial parameters. 
 def InitGL(Width, Height):                # We call this right after our OpenGL window is created.
-    LoadTextures()
-    glEnable(GL_TEXTURE_2D)
+    #LoadTextures()
+    #glEnable(GL_TEXTURE_2D)
     glClearColor(1.0, 1.0, 1.0, 1.0)    # This Will Clear The Background Color To Black
     glClearDepth(1.0)                    # Enables Clearing Of The Depth Buffer
     glDepthFunc(GL_LESS)                # The Type Of Depth Test To Do
@@ -132,19 +144,37 @@ def DrawGLScene():
     
     #glTranslatef(-4.0,-4.0,-10.0)            # Move Into The Screen
     #glRotate(45,0,0,1)
-    gluLookAt(0.0,3.0,20,4.5,4.5,0, 0, 1, 0)
+    gluLookAt(3.0,3.0,20,4.5,4.5,0, 0, 1, 0)
 
-    glEnable(GL_TEXTURE_2D)
-    glBegin(GL_QUADS)                # Start Drawing The Cube
-    # Front Face (note that the texture's corners have to match the quad's corners)
-    glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0,  -0.00001)    # Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0, 0.0); glVertex3f( 1.0, 0.0,  -0.00001)    # Bottom Right Of The Texture and Quad
-    glTexCoord2f(1.0, 1.0); glVertex3f( 1.0,  1.0, -0.00001)    # Top Right Of The Texture and Quad
-    glTexCoord2f(0.0, 1.0); glVertex3f(0.0,  1.0,  -0.00001)    # Top Left Of The Texture and Quad
-    glEnd();                # Done Drawing The Cube
+
+
+    drawCharacter(1,0,0);
+    drawCharacter(2,1,1);
+    drawCharacter(3,2,2);
+    drawCharacter(4,3,3);
+    drawCharacter(5,4,4);
+    drawCharacter(6,5,5);
+    drawCharacter(7,6,6);
+    drawCharacter(8,7,7);
+    drawCharacter(9,8,8);
 
     glDisable(GL_TEXTURE_2D)
+    glLineWidth(3)
+    glBegin(GL_LINES)
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex3f(0, 0, 0)
+    glVertex3f(1, 0, 0)
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex3f(0, 0, 0)
+    glVertex3f(0, 1, 0)
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex3f(0, 0, 0)
+    glVertex3f(0, 0, 1)
+    glEnd()
     sudokuGrid()
+
+
+
     
 
 
@@ -169,7 +199,7 @@ def main():
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
     
     # get a 640 x 480 window 
-    glutInitWindowSize(640, 480)
+    glutInitWindowSize(720, 1280)
     
     # the window starts at the upper left corner of the screen 
     glutInitWindowPosition(0, 0)
