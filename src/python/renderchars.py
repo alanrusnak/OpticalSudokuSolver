@@ -2,11 +2,10 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import sys
-from Image import *
+import socket
+from Image import *   #have to import both Image packages in this order
+from PIL import Image
 
-# Some api in the chain is translating the keystrokes to this octal string
-# so instead of saying: ESCAPE = 27, we use the following.
-ESCAPE = '\033'
 
 # Number of the glut window.
 window = 0
@@ -107,133 +106,105 @@ def LoadTexture(num):
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL)
 
 # A general OpenGL initialization function.  Sets all of the initial parameters. 
-def InitGL(Width, Height):                # We call this right after our OpenGL window is created.
-    #LoadTextures()
-    #glEnable(GL_TEXTURE_2D)
-    glClearColor(1.0, 1.0, 1.0, 1.0)    # This Will Clear The Background Color To Black
-    glClearDepth(1.0)                    # Enables Clearing Of The Depth Buffer
-    glDepthFunc(GL_LESS)                # The Type Of Depth Test To Do
-    glEnable(GL_DEPTH_TEST)                # Enables Depth Testing
-    glShadeModel(GL_SMOOTH)                # Enables Smooth Color Shading
-    
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()                    # Reset The Projection Matrix
-                                        # Calculate The Aspect Ratio Of The Window
-    gluPerspective(45.0, float(Width)/float(Height), 0.1, 100.0)
+def InitGL(width, height):                # We call this right after our OpenGL window is created.
+    global window
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA)
+    glutInitWindowSize(width, height)
+    glutCreateWindow("Sudoku Render")
+    glutHideWindow()
+    glViewport( 0, 0, width, height )
 
-    glMatrixMode(GL_MODELVIEW)
+    glShadeModel( GL_SMOOTH )
+    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST )
 
-# The function called when our window is resized (which shouldn't happen if you enable fullscreen, below)
+    viewport = glGetIntegerv( GL_VIEWPORT )
+
+    glMatrixMode( GL_PROJECTION )
+    glLoadIdentity( )
+    gluPerspective( 60.0, float( viewport[ 2 ] ) / float( viewport[ 3 ] ), 0.1, 1000.0 )
+    glMatrixMode( GL_MODELVIEW )
+    glLoadIdentity( )
+    glClearColor(1,1,1,1)
+
+# The function called when our window is resized
 def ReSizeGLScene(Width, Height):
-    if Height == 0:                        # Prevent A Divide By Zero If The Window Is Too Small 
+    if Height == 0:                        # Prevent A Divide By Zero If The Window Is Too Small
         Height = 1
 
     glViewport(0, 0, Width, Height)        # Reset The Current Viewport And Perspective Transformation
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(45.0, float(Width)/float(Height), 0.1, 100.0)
+    gluPerspective(60.0, float(Width)/float(Height), 0.1, 1000.0)
     glMatrixMode(GL_MODELVIEW)
 
 # The main drawing function. 
-def DrawGLScene():
+def DrawGLScene(CMDS):
     global texture
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)    # Clear The Screen And The Depth Buffer
     glLoadIdentity()                    # Reset The View
     glClearColor(1,1,1,1.0)
-    
-    #glTranslatef(-4.0,-4.0,-10.0)            # Move Into The Screen
-    #glRotate(45,0,0,1)
-    gluLookAt(3.0,3.0,20,4.5,4.5,0, 0, 1, 0)
+
+    ex,ey,ez,cx,cy,cz,characters = CMDS.split("_")
+    ex = float(ex)
+    ey = float(ey)
+    ez = float(ez)
+    cx = float(cx)
+    cy = float(cy)
+    cz = float(cz)
+
+    gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
+
+    i = 0
+    for c in characters:
+        if(c=='e'):
+           i = i + 1
+        else:
+            drawCharacter(c,i%9,i/9)
+            i = i+1
 
 
-
-    drawCharacter(1,0,0);
-    drawCharacter(2,1,1);
-    drawCharacter(3,2,2);
-    drawCharacter(4,3,3);
-    drawCharacter(5,4,4);
-    drawCharacter(6,5,5);
-    drawCharacter(7,6,6);
-    drawCharacter(8,7,7);
-    drawCharacter(9,8,8);
 
     glDisable(GL_TEXTURE_2D)
-    glLineWidth(3)
-    glBegin(GL_LINES)
-    glColor3f(1.0, 0.0, 0.0)
-    glVertex3f(0, 0, 0)
-    glVertex3f(1, 0, 0)
-    glColor3f(0.0, 1.0, 0.0)
-    glVertex3f(0, 0, 0)
-    glVertex3f(0, 1, 0)
-    glColor3f(0.0, 0.0, 1.0)
-    glVertex3f(0, 0, 0)
-    glVertex3f(0, 0, 1)
-    glEnd()
     sudokuGrid()
 
 
 
-    
-
-
-    #  since this is double buffered, swap the buffers to display what just got drawn. 
+    width,height = 720,1280
+    imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + CMDS+ ".png"
+    glPixelStorei(GL_PACK_ALIGNMENT, 1)
+    data = glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE)
+    image = Image.fromstring("RGBA",(width,height),data)
+    image = image.transpose( Image.FLIP_TOP_BOTTOM)
     glutSwapBuffers()
+    image=image.convert('L')
+    image.save(imagepath)
 
-# The function called whenever a key is pressed. Note the use of Python tuples to pass in: (key, x, y)  
-def keyPressed(*args):
-    # If escape is pressed, kill everything.
-    if args[0] == ESCAPE:
-        sys.exit()
-
-def main():
-    global window
-    glutInit(sys.argv)
-
-    # Select type of Display mode:   
-    #  Double buffer 
-    #  RGBA color
-    # Alpha components supported 
-    # Depth buffer
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH)
-    
-    # get a 640 x 480 window 
-    glutInitWindowSize(720, 1280)
-    
-    # the window starts at the upper left corner of the screen 
-    glutInitWindowPosition(0, 0)
-    
-    # Okay, like the C version we retain the window id to use when closing, but for those of you new
-    # to Python (like myself), remember this assignment would make the variable local and not global
-    # if it weren't for the global declaration at the start of main.
-    window = glutCreateWindow("SudokuRenderer")
-
-       # Register the drawing function with glut, BUT in Python land, at least using PyOpenGL, we need to
-    # set the function pointer and invoke a function to actually register the callback, otherwise it
-    # would be very much like the C version of the code.    
-    glutDisplayFunc(DrawGLScene)
-    
-    # Uncomment this line to get full screen.
-    # glutFullScreen()
-
-    # When we are doing nothing, redraw the scene.
-    glutIdleFunc(DrawGLScene)
-    
-    # Register the function called when our window is resized.
-    glutReshapeFunc(ReSizeGLScene)
-    
-    # Register the function called when the keyboard is pressed.  
-    glutKeyboardFunc(keyPressed)
-
-    # Initialize our window. 
-    InitGL(640, 480)
-
-    # Start Event Processing Engine    
-    glutMainLoop()
 
 # Print message to console, and kick off the main to get it rolling.
-if __name__ == "__main__":
-    print "Hit ESC key to quit."
-    main()
+def runServer(TCP_IP,TCP_PORT):
+    BUFFER_SIZE = 1024
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((TCP_IP, TCP_PORT))
+    s.listen(1)
+
+    while 1:
+        conn, addr = s.accept()
+        print 'Connection address:', addr
+
+        while 1:
+            CMDS = conn.recv(BUFFER_SIZE)
+            CMDS = CMDS.rstrip('\n')
+            if not CMDS: break
+            print "received data:", CMDS
+
+            imagepath = DrawGLScene(CMDS)
+            conn.send(imagepath + "\n")  # echo
+        conn.close()
+
+InitGL(720,1280)
+runServer('127.0.0.1',5005)
+#DrawGLScene("4.5_4.5_20_4.5_4.5_0_e1e2e3e4e5e6e7e8e9e0")
+#DrawGLScene("4.5_1.5_20_4.5_4.5_0_e1e2e3e4e5e6e7e8e9e0")
         
