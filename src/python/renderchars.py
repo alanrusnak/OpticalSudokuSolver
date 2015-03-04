@@ -77,10 +77,10 @@ def drawCharacter(num,x,y):
     glEnable(GL_TEXTURE_2D)
     glBegin(GL_QUADS)                # Start Drawing The Cube
     # Front Face (note that the texture's corners have to match the quad's corners)
-    glTexCoord2f(0.0, 0.0); glVertex3f(x, y,  -0.01)    # Bottom Left Of The Texture and Quad
-    glTexCoord2f(1.0, 0.0); glVertex3f( x+1, y,  -0.01)    # Bottom Right Of The Texture and Quad
-    glTexCoord2f(1.0, 1.0); glVertex3f( x+1,  y+1, -0.01)    # Top Right Of The Texture and Quad
-    glTexCoord2f(0.0, 1.0); glVertex3f(x,  y+1,  -0.01)    # Top Left Of The Texture and Quad
+    glTexCoord2f(0.0, 0.0); glVertex3f(x, y,  -0.001)    # Bottom Left Of The Texture and Quad
+    glTexCoord2f(1.0, 0.0); glVertex3f( x+1, y,  -0.001)    # Bottom Right Of The Texture and Quad
+    glTexCoord2f(1.0, 1.0); glVertex3f( x+1,  y+1, -0.001)    # Top Right Of The Texture and Quad
+    glTexCoord2f(0.0, 1.0); glVertex3f(x,  y+1,  -0.001)    # Top Left Of The Texture and Quad
     glEnd();                # Done Drawing The Cube
 
 
@@ -138,30 +138,45 @@ def ReSizeGLScene(Width, Height):
     gluPerspective(60.0, float(Width)/float(Height), 0.1, 1000.0)
     glMatrixMode(GL_MODELVIEW)
 
+counter = 0
 # The main drawing function. 
 def DrawGLScene(CMDS):
     global texture
+    global counter
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)    # Clear The Screen And The Depth Buffer
     glLoadIdentity()                    # Reset The View
     glClearColor(1,1,1,1.0)
 
-    ex,ey,ez,cx,cy,cz,characters = CMDS.split("_")
-    ex = float(ex)
-    ey = float(ey)
-    ez = float(ez)
-    cx = float(cx)
-    cy = float(cy)
-    cz = float(cz)
+    if (CMDS.count("_")==5):
+        ex,ey,ez,cx,cy,cz = CMDS.split("_")
+        ex = float(ex)
+        ey = float(ey)
+        ez = float(ez)
+        cx = float(cx)
+        cy = float(cy)
+        cz = float(cz)
 
-    gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
+        gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
+    else:
+        ex,ey,ez,cx,cy,cz,characters = CMDS.split("_")
+        ex = float(ex)
+        ey = float(ey)
+        ez = float(ez)
+        cx = float(cx)
+        cy = float(cy)
+        cz = float(cz)
+        characters = characters.replace("-1","e")
 
-    i = 0
-    for c in characters:
-        if(c=='e'):
-           i = i + 1
-        else:
-            drawCharacter(c,i%9,i/9)
-            i = i+1
+        gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
+
+
+        i = 0
+        for c in characters:
+            if(c=='e'):
+                i = i + 1
+            else:
+                drawCharacter(c,i%9,i/9)
+                i = i+1
 
 
 
@@ -171,7 +186,9 @@ def DrawGLScene(CMDS):
 
 
     width,height = 720,1280
-    imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + CMDS+ ".png"
+    imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + str(counter) + ".png"
+    counter = counter + 1
+    #imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + CMDS + ".png"
     glPixelStorei(GL_PACK_ALIGNMENT, 1)
     data = glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE)
     image = Image.fromstring("RGBA",(width,height),data)
@@ -179,6 +196,7 @@ def DrawGLScene(CMDS):
     glutSwapBuffers()
     image=image.convert('L')
     image.save(imagepath)
+    return imagepath
 
 
 # Print message to console, and kick off the main to get it rolling.
@@ -205,6 +223,6 @@ def runServer(TCP_IP,TCP_PORT):
 
 InitGL(720,1280)
 runServer('127.0.0.1',5005)
-#DrawGLScene("4.5_4.5_20_4.5_4.5_0_e1e2e3e4e5e6e7e8e9e0")
+#DrawGLScene("4.5_4.5_16_4.5_5.5_0_1")
 #DrawGLScene("4.5_1.5_20_4.5_4.5_0_e1e2e3e4e5e6e7e8e9e0")
         
