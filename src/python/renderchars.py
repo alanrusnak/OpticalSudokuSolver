@@ -1,7 +1,11 @@
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
+import cv2
+import time
 import sys
+import numpy
+from skimage import feature
 import socket
 from Image import *   #have to import both Image packages in this order
 from PIL import Image
@@ -72,8 +76,8 @@ def sudokuGrid():
     glVertex3f(8, 9, 0)
     glEnd()
 
-def drawCharacter(num,x,y):
-    LoadTexture(str(num))
+def drawCharacter(num,blur,x,y):
+    LoadTexture(str(num),str(blur))
     glEnable(GL_TEXTURE_2D)
     glBegin(GL_QUADS)                # Start Drawing The Cube
     # Front Face (note that the texture's corners have to match the quad's corners)
@@ -84,9 +88,9 @@ def drawCharacter(num,x,y):
     glEnd();                # Done Drawing The Cube
 
 
-def LoadTexture(num):
+def LoadTexture(num,blur):
     #global texture
-    image = open(num + ".bmp")
+    image = open("characters/" + num + "b" + blur + ".bmp")
     
     ix = image.size[0]
     iy = image.size[1]
@@ -165,18 +169,33 @@ def DrawGLScene(CMDS):
         cx = float(cx)
         cy = float(cy)
         cz = float(cz)
-        characters = characters.replace("-1","e")
+
 
         gluLookAt(ex,ey,ez,cx,cy,cz, 0, 1, 0)
 
+        #draws the first character
+        #if(characters[0]!='0'):
+        #   drawCharacter(characters[0],characters[1],0%9,0/9)
+
+
 
         i = 0
+        while i < len(characters):
+            if(characters[i]=='0'):
+                i = i + 1
+            else:
+               drawCharacter(characters[i],0,(i)%9,(i)/9)
+               i = i+1
+
+        '''
+        i = 0
         for c in characters:
-            if(c=='e'):
+            if(c==0):
                 i = i + 1
             else:
                 drawCharacter(c,i%9,i/9)
                 i = i+1
+        '''
 
 
 
@@ -184,7 +203,7 @@ def DrawGLScene(CMDS):
     sudokuGrid()
 
 
-
+    #a = time.time()
     width,height = 720,1280
     imagepath = "C:/Users/Alan/Documents/SudokuProject/renders/" + str(counter) + ".png"
     counter = counter + 1
@@ -196,6 +215,15 @@ def DrawGLScene(CMDS):
     glutSwapBuffers()
     image=image.convert('L')
     image.save(imagepath)
+
+    '''
+    img = numpy.asarray(image)
+    img = cv2.GaussianBlur(img,(3,3),0)
+    img= cv2.Canny(img,300,400)
+    cv2.imwrite(imagepath,img)
+    #print((time.time()-a)*1000)
+    '''
+
     return imagepath
 
 
