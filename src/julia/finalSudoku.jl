@@ -1,3 +1,5 @@
+# Alan Rusnak, 2015, University of Cambridge
+
 include("engine/picture.jl")
 using Debug
 @pyimport scipy.misc as scpy
@@ -50,22 +52,22 @@ function PROGRAM()
 	cnt=1;
 
 
-  ex = Uniform(3,6,1,1)
-  ey = Uniform(3,6,1,1)
+  ex = Uniform(1,8,1,1)
+  ey = Uniform(1,8,1,1)
   ez = Uniform(15,18,1,1)
   cx = Uniform(3,6,1,1)
   cy = Uniform(3,6,1,1)
-  r = Uniform(-0.3,0.3,1,1)
+  r = Uniform(-1,1,1,1)
   cz = 0
 
 
 
   CMDS = string(ex) * "_" * string(ey) * "_" * string(ez) * "_" * string(cx) * "_" * string(cy) * "_" * string(r)
-  
+
 
 
 	rendering = render(CMDS)
-  
+
 
 
 
@@ -93,7 +95,7 @@ function PROGRAM2()
   global CMDS
   global CMDSB
   global OBS_IMAGE
-  global OBS_NAME  
+  global OBS_NAME
 	LINE=Stack(Int);FUNC=Stack(Int);LOOP=Stack(Int)
 
 
@@ -131,9 +133,9 @@ function PROGRAM2()
   end
 
   rendering = render(CMDS)
-  scpy.imsave(string("C:/Users/Alan/Documents/SudokuProject/output2/" * CMDS * ".png",), rendering)  
+  scpy.imsave(string("C:/Users/Alan/Documents/SudokuProject/output2/" * CMDS * ".png",), rendering)
   #println(CMDS)
-  
+
 	return rendering
 end
 
